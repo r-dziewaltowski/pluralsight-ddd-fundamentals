@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Linq;
-using System.Threading.Tasks;
+using FrontDesk.Core.Exceptions;
 using FrontDesk.Core.ScheduleAggregate;
 using PluralsightDdd.SharedKernel;
+using UnitTests.Builders;
 using Xunit;
 
 namespace UnitTests.Core.AggregatesEntities.ScheduleTests
@@ -13,17 +14,19 @@ namespace UnitTests.Core.AggregatesEntities.ScheduleTests
     private readonly DateTimeOffsetRange _dateRange = new DateTimeOffsetRange(DateTime.Today, DateTime.Today.AddDays(1));
     private readonly int _clinicId = 1;
 
-    //[Fact]
-    //public async Task ThrowsGivenDuplicateAppointmentWithNonEmptyId()
-    //{
-    //  // TODO: Implement Test
-    //}
+    [Fact]
+    public void ThrowsGivenDuplicateAppointmentWithNonEmptyId()
+    {
+      // Arrange
+      var schedule = new Schedule(_scheduleId, _dateRange, _clinicId);
+      var appointmentId = Guid.NewGuid();
+      var appointment1 = CreateAppointment(appointmentId);
+      schedule.AddNewAppointment(appointment1);
 
-    //[Fact]
-    //public async Task MarksConflictingAppointments()
-    //{
-    //  // TODO: Implement Test
-    //}
+      // Act + Assert
+      var appointment2 = CreateAppointment(appointmentId);
+      Assert.Throws<DuplicateAppointmentException>(() => schedule.AddNewAppointment(appointment2));
+    }
 
     [Fact]
     public void AddsAppointmentScheduledEvent()
@@ -51,6 +54,11 @@ namespace UnitTests.Core.AggregatesEntities.ScheduleTests
       Assert.Equal(2, schedule.Appointments.Count());
       Assert.False(lisaAppointment.IsPotentiallyConflicting);
       Assert.False(mimiAppointment.IsPotentiallyConflicting);
+    }
+
+    private static Appointment CreateAppointment(Guid id)
+    {
+      return new AppointmentBuilder().WithDefaultValues().WithId(id).Build();
     }
   }
 }
