@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using PluralsightDdd.SharedKernel.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
 using FrontDesk.Core.ScheduleAggregate;
+using System;
 
 namespace FrontDesk.Api.AppointmentEndpoints
 {
@@ -46,17 +47,16 @@ namespace FrontDesk.Api.AppointmentEndpoints
       var response = new UpdateAppointmentResponse(request.CorrelationId());
 
       var apptType = await _appointmentTypeRepository.GetByIdAsync(request.AppointmentTypeId);
-
       var spec = new ScheduleByIdWithAppointmentsSpec(request.ScheduleId); // TODO: Just get that day's appointments
       var schedule = await _scheduleReadRepository.GetBySpecAsync(spec);
-
-      var apptToUpdate = schedule.Appointments
-                            .FirstOrDefault(a => a.Id == request.Id);
-      apptToUpdate.UpdateAppointmentType(apptType, schedule.AppointmentUpdatedHandler);
-      apptToUpdate.UpdateRoom(request.RoomId);
-      apptToUpdate.UpdateStartTime(request.Start, schedule.AppointmentUpdatedHandler);
-      apptToUpdate.UpdateTitle(request.Title);
-      apptToUpdate.UpdateDoctor(request.DoctorId);
+      
+      var apptToUpdate = schedule.UpdateAppointment(
+        request.Id, 
+        apptType, 
+        request.Start, 
+        request.RoomId, 
+        request.DoctorId, 
+        request.Title);
 
       await _scheduleRepository.UpdateAsync(schedule);
 

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Ardalis.GuardClauses;
 using FrontDesk.Core.Events;
+using FrontDesk.Core.SyncedAggregates;
+using MediatR;
 using PluralsightDdd.SharedKernel;
 using PluralsightDdd.SharedKernel.Interfaces;
 
@@ -63,8 +65,30 @@ namespace FrontDesk.Core.ScheduleAggregate
       Events.Add(appointmentDeletedEvent);
     }
 
+    public Appointment UpdateAppointment(
+      Guid apptId, 
+      AppointmentType apptType,  
+      DateTimeOffset start,
+      int roomId,
+      int doctorId,
+      string title)
+    {
+      Guard.Against.Default(apptId, nameof(apptId));
+      Guard.Against.Default(apptType, nameof(apptType));
+      Guard.Against.Default(roomId, nameof(roomId));
+      Guard.Against.Default(doctorId, nameof(doctorId));
+      var apptToUpdate = Guard.Against.NonExistentAppointment(_appointments, apptId);
 
+      apptToUpdate.UpdateAppointmentType(apptType);
+      apptToUpdate.UpdateStartTime(start);
+      apptToUpdate.UpdateRoom(roomId);
+      apptToUpdate.UpdateDoctor(doctorId);
+      apptToUpdate.UpdateTitle(title);
 
+      MarkConflictingAppointments();
+
+      return apptToUpdate;
+    }
 
     private void MarkConflictingAppointments()
     {
@@ -82,15 +106,6 @@ namespace FrontDesk.Core.ScheduleAggregate
 
         appointment.IsPotentiallyConflicting = potentiallyConflictingAppointments.Any();
       }
-    }
-
-    /// <summary>
-    /// Call any time this schedule's appointments are updated directly
-    /// </summary>
-    public void AppointmentUpdatedHandler()
-    {
-      // TODO: Add ScheduleHandler calls to UpdateDoctor, UpdateRoom to complete additional rules described in MarkConflictingAppointments
-      MarkConflictingAppointments();
     }
   }
 }

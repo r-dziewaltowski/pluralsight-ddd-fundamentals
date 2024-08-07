@@ -67,14 +67,11 @@ namespace FrontDesk.Core.ScheduleAggregate
       Events.Add(appointmentUpdatedEvent);
     }
 
-    public void UpdateStartTime(DateTimeOffset newStartTime,
-      Action scheduleHandler)
+    public void UpdateStartTime(DateTimeOffset newStartTime)
     {
       if (newStartTime == TimeRange.Start) return;
 
       TimeRange = new DateTimeOffsetRange(newStartTime, TimeSpan.FromMinutes(TimeRange.DurationInMinutes()));
-
-      scheduleHandler?.Invoke();
 
       var appointmentUpdatedEvent = new AppointmentUpdatedEvent(this);
       Events.Add(appointmentUpdatedEvent);
@@ -90,16 +87,13 @@ namespace FrontDesk.Core.ScheduleAggregate
       Events.Add(appointmentUpdatedEvent);
     }
 
-    public void UpdateAppointmentType(AppointmentType appointmentType,
-      Action scheduleHandler)
+    public void UpdateAppointmentType(AppointmentType appointmentType)
     {
       Guard.Against.Null(appointmentType, nameof(appointmentType));
       if (AppointmentTypeId == appointmentType.Id) return;
 
       AppointmentTypeId = appointmentType.Id;
       TimeRange = TimeRange.NewEnd(TimeRange.Start.AddMinutes(appointmentType.Duration));
-
-      scheduleHandler?.Invoke();
 
       var appointmentUpdatedEvent = new AppointmentUpdatedEvent(this);
       Events.Add(appointmentUpdatedEvent);

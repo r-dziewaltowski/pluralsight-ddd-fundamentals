@@ -1,5 +1,4 @@
 ﻿using System;
-using FrontDesk.Core.SyncedAggregates;
 using PluralsightDdd.SharedKernel;
 using UnitTests.Builders;
 using Xunit;
@@ -28,18 +27,15 @@ namespace UnitTests.Core.AggregatesEntities.AppointmentTests
 
       var newStartTime = new DateTime(2021, 01, 01, 11, 00, 00);
 
-      appointment.UpdateStartTime(newStartTime, null);
+      appointment.UpdateStartTime(newStartTime);
 
       Assert.Equal(_newDateTimeOffsetRange.DurationInMinutes(), appointment.TimeRange.DurationInMinutes());
       Assert.Equal(newStartTime, appointment.TimeRange.Start);
     }
 
     [Fact]
-    public void CallsHandlerWhenSuccessful()
+    public void AddsEventWhenSuccessful()
     {
-      var handlerCalled = false;
-      Action handler = () => handlerCalled = true;
-
       var appointment = _builder
         .WithDefaultValues()
         .WithDateTimeOffsetRange(_newDateTimeOffsetRange)
@@ -47,17 +43,14 @@ namespace UnitTests.Core.AggregatesEntities.AppointmentTests
 
       var newStartTime = new DateTime(2021, 01, 01, 11, 00, 00);
 
-      appointment.UpdateStartTime(newStartTime, handler);
+      appointment.UpdateStartTime(newStartTime);
 
-      Assert.True(handlerCalled);
+      Assert.NotEmpty(appointment.Events);
     }
 
     [Fact]
-    public void DoesNotCallHandlerWhenNoActualUpdateMade()
+    public void DoesNotAddEventWhenNoActualUpdateMade()
     {
-      var handlerCalled = false;
-      Action handler = () => handlerCalled = true;
-
       var appointment = _builder
         .WithDefaultValues()
         .WithDateTimeOffsetRange(_newDateTimeOffsetRange)
@@ -65,9 +58,9 @@ namespace UnitTests.Core.AggregatesEntities.AppointmentTests
 
       var newStartTime = _startTime;
 
-      appointment.UpdateStartTime(newStartTime, handler);
+      appointment.UpdateStartTime(newStartTime);
 
-      Assert.False(handlerCalled);
+      Assert.Empty(appointment.Events);
     }
   }
 }
