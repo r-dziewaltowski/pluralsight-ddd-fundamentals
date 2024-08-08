@@ -12,9 +12,10 @@ namespace UnitTests.Core.AggregatesEntities.ScheduleTests
   {
     const int NewRoomId = 100;
     const int NewDoctorId = 101;
+    const int NewPatientId = 102;
     const string NewTitle = "test title";
     const int ApptDuration = 45;
-    private readonly AppointmentType _apptType = new(102, "Test AppointmentType", "Test Code", ApptDuration);
+    private readonly AppointmentType _apptType = new(103, "Test AppointmentType", "Test Code", ApptDuration);
     private readonly DateTimeOffset _start = new(new DateTime(2024, 6, 6, 11, 0, 0));
     private readonly DateTimeOffsetRange _range;
 
@@ -71,8 +72,8 @@ namespace UnitTests.Core.AggregatesEntities.ScheduleTests
     {
       // Arrange
       var schedule = CreateSchedule();
-      var appointment1 = CreateAppointment(_range, _apptType.Id, NewRoomId, NewDoctorId);
-      var appointment2 = CreateAppointment(_range, _apptType.Id + 1, NewRoomId + 1, NewDoctorId + 1);
+      var appointment1 = CreateAppointment(_range, _apptType.Id, NewRoomId, NewDoctorId, NewPatientId);
+      var appointment2 = CreateAppointment(_range, _apptType.Id + 1, NewRoomId + 1, NewDoctorId + 1, NewPatientId + 1);
       schedule.AddNewAppointment(appointment1);
       schedule.AddNewAppointment(appointment2);
 
@@ -90,8 +91,8 @@ namespace UnitTests.Core.AggregatesEntities.ScheduleTests
     {
       // Arrange
       var schedule = CreateSchedule();
-      var appointment1 = CreateAppointment(_range, _apptType.Id, NewRoomId, NewDoctorId);
-      var appointment2 = CreateAppointment(_range, _apptType.Id + 1, NewRoomId + 1, NewDoctorId + 1);
+      var appointment1 = CreateAppointment(_range, _apptType.Id, NewRoomId, NewDoctorId, NewPatientId);
+      var appointment2 = CreateAppointment(_range, _apptType.Id + 1, NewRoomId + 1, NewDoctorId + 1, NewPatientId + 1);
       schedule.AddNewAppointment(appointment1);
       schedule.AddNewAppointment(appointment2);
 
@@ -109,9 +110,9 @@ namespace UnitTests.Core.AggregatesEntities.ScheduleTests
     {
       // Arrange
       var schedule = CreateSchedule();
-      var appointment1 = CreateAppointment(_range, _apptType.Id, NewRoomId, NewDoctorId);
+      var appointment1 = CreateAppointment(_range, _apptType.Id, NewRoomId, NewDoctorId, NewPatientId);
       var lateStart = new DateTimeOffsetRange(_start.AddHours(3), TimeSpan.FromMinutes(60));
-      var appointment2 = CreateAppointment(lateStart, _apptType.Id + 1, NewRoomId + 1, NewDoctorId + 1);
+      var appointment2 = CreateAppointment(lateStart, _apptType.Id + 1, NewRoomId, NewDoctorId, NewPatientId);
       schedule.AddNewAppointment(appointment1);
       schedule.AddNewAppointment(appointment2);
 
@@ -129,14 +130,14 @@ namespace UnitTests.Core.AggregatesEntities.ScheduleTests
     {
       // Arrange
       var schedule = CreateSchedule();
-      var appointment1 = CreateAppointment(_range, _apptType.Id, NewRoomId, NewDoctorId);
+      var appointment1 = CreateAppointment(_range, _apptType.Id, NewRoomId, NewDoctorId, NewPatientId);
       var lateStart = new DateTimeOffsetRange(_start.AddHours(1), TimeSpan.FromMinutes(60));
-      var appointment2 = CreateAppointment(lateStart, _apptType.Id + 1, NewRoomId + 1, NewDoctorId + 1);
+      var appointment2 = CreateAppointment(lateStart, _apptType.Id + 1, NewRoomId, NewDoctorId, NewPatientId);
       schedule.AddNewAppointment(appointment1);
       schedule.AddNewAppointment(appointment2);
 
       // Act
-      var newApptType = new AppointmentType(103, "Test AppointmentType", "Test Code", 90);
+      var newApptType = new AppointmentType(104, "Test AppointmentType", "Test Code", 90);
       var updatedAppointment = schedule.UpdateAppointment(
         appointment1.Id, newApptType, _start, NewRoomId, NewDoctorId, NewTitle);
 
@@ -146,7 +147,7 @@ namespace UnitTests.Core.AggregatesEntities.ScheduleTests
     }
 
     private Appointment CreateAppointment(DateTimeOffsetRange dateTimeOffsetRange, int appointmentTypeId,
-      int roomId, int doctorId)
+      int roomId, int doctorId, int patientId)
     {
       var appointmentBuilder = new AppointmentBuilder();
 
@@ -156,6 +157,7 @@ namespace UnitTests.Core.AggregatesEntities.ScheduleTests
         WithAppointmentTypeId(appointmentTypeId).
         WithRoomId(roomId).
         WithDoctorId(doctorId).
+        WithPatientId(patientId).
         Build();
     }
 
