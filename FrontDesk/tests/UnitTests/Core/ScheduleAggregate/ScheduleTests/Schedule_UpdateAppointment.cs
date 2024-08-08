@@ -27,39 +27,6 @@ namespace UnitTests.Core.AggregatesEntities.ScheduleTests
     }
 
     [Fact]
-    public void ThrowsGivenNullAppointmentType()
-    {
-      // Arrange
-      var schedule = new ScheduleBuilder().WithDefaultValues().Build();
-
-      // Act + Assert
-      Assert.Throws<ArgumentException>(() => schedule.UpdateAppointment(
-        Guid.NewGuid(), null, _start, NewRoomId, NewDoctorId, NewTitle));
-    }
-
-    [Fact]
-    public void ThrowsGivenZeroRoomId()
-    {
-      // Arrange
-      var schedule = new ScheduleBuilder().WithDefaultValues().Build();
-
-      // Act + Assert
-      Assert.Throws<ArgumentException>(() => schedule.UpdateAppointment(
-        Guid.NewGuid(), _apptType, _start, 0, NewDoctorId, NewTitle));
-    }
-
-    [Fact]
-    public void ThrowsGivenZeroDoctorId()
-    {
-      // Arrange
-      var schedule = new ScheduleBuilder().WithDefaultValues().Build();
-
-      // Act + Assert
-      Assert.Throws<ArgumentException>(() => schedule.UpdateAppointment(
-        Guid.NewGuid(), _apptType, _start, NewRoomId, 0, NewTitle));
-    }
-
-    [Fact]
     public void ThrowsGivenNonExistentAppointment()
     {
       // Arrange

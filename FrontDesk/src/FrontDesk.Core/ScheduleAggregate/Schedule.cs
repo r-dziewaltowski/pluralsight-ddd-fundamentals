@@ -74,9 +74,6 @@ namespace FrontDesk.Core.ScheduleAggregate
       string title)
     {
       Guard.Against.Default(apptId, nameof(apptId));
-      Guard.Against.Default(apptType, nameof(apptType));
-      Guard.Against.Default(roomId, nameof(roomId));
-      Guard.Against.Default(doctorId, nameof(doctorId));
       var apptToUpdate = Guard.Against.NonExistentAppointment(_appointments, apptId);
 
       apptToUpdate.UpdateAppointmentType(apptType);
