@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 using FrontDesk.Core.ScheduleAggregate;
 using FrontDesk.Core.SyncedAggregates;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using PluralsightDdd.SharedKernel;
 
 namespace FrontDesk.Infrastructure.Data
@@ -19,6 +18,7 @@ namespace FrontDesk.Infrastructure.Data
         : base(options)
     {
       _mediator = mediator;
+      SavingChanges += DispatchEvents;
     }
 
     public DbSet<Schedule> Schedules { get; set; }
@@ -35,14 +35,10 @@ namespace FrontDesk.Infrastructure.Data
       modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 
-    // TODO: Use DbContext.SavedChanges event and handler to support events
-    // https://docs.microsoft.com/en-us/ef/core/logging-events-diagnostics/events
-    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+    private void DispatchEvents(object sender, SavingChangesEventArgs e)
     {
-      int result = await base.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
       // ignore events if no dispatcher provided
-      if (_mediator == null) return result;
+      if (_mediator == null) return;
 
       var entitiesWithEvents = ChangeTracker
           .Entries()
@@ -56,16 +52,9 @@ namespace FrontDesk.Infrastructure.Data
         entity.Events.Clear();
         foreach (var domainEvent in events)
         {
-          await _mediator.Publish(domainEvent).ConfigureAwait(false);
+          _mediator.Publish(domainEvent);
         }
       }
-
-      return result;
-    }
-
-    public override int SaveChanges()
-    {
-      return SaveChangesAsync().GetAwaiter().GetResult();
     }
   }
 }
