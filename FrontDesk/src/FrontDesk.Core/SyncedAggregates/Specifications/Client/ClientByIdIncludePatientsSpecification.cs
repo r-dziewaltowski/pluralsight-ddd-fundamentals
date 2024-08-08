@@ -2,7 +2,7 @@
 
 namespace FrontDesk.Core.SyncedAggregates.Specifications
 {
-  public class ClientByIdIncludePatientsSpecification : Specification<Client>, ISingleResultSpecification
+  public class ClientByIdIncludePatientsSpecification : Specification<Client>, ISingleResultSpecification<Client>
   {
     public ClientByIdIncludePatientsSpecification(int clientId)
     {

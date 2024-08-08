@@ -29,6 +29,7 @@ namespace FunctionalTests.ClientEndpoints
       var result = await _client.GetAndDeserializeAsync<GetByIdClientResponse>(route, _outputHelper);
 
       Assert.Equal("Steve Smith", result.Client.FullName);
+      Assert.Equal(3, result.Client.Patients.Count);
     }
 
     [Fact]
